@@ -23,16 +23,20 @@ namespace CanWeFixItService
             _connection.Open();
         }
         
-        public IEnumerable<Instrument> Instruments()
+        public async Task<IEnumerable<Instrument>> Instruments()
         {
-            return _connection.QueryAsync<Instrument>("SQL GOES HERE");
+            return await _connection.QueryAsync<Instrument>("SELECT id,name,sedol, CASE WHEN i.Active = 1 THEN 'True' WHEN i.Active = 0 THEN 'False' END Active from instrument i where active = 1");
         }
 
-        public async Task<IEnumerable<MarketData>> MarketData()
+        public async Task<IEnumerable<MarketDataDto>> MarketData()
         {
-            return await _connection.QueryAsync<MarketData>("SELECT Id, DataValue FROM MarketData WHERE Active = 0");
+            return await _connection.QueryAsync<MarketDataDto>("SELECT m.Id, m.DataValue,i.id InstrumentId ,CASE WHEN i.Active = 1 THEN 'True'WHEN i.Active = 0 THEN 'False'END Active FROM MarketData m inner join Instrument i on m.sedol = i.sedol WHERE m.Active = 1 and m.sedol = i.sedol");
         }
 
+        public async Task<IEnumerable<MarketValuation>> MarketValuation()
+        {
+            return await _connection.QueryAsync<MarketValuation>("SELECT 'DataValueTotal' name,Sum(m.DataValue) total from MarketData m where m.Active = 1");
+        }
         /// <summary>
         /// This is complete and will correctly load the test data.
         /// It is called during app startup 

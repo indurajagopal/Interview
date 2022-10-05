@@ -2,6 +2,7 @@ namespace CanWeFixItService
 {
     public class MarketValuation
     {
-        // TODO:
+        public string  name { get; set; }
+        public long total { get; set; }
     }
 }
